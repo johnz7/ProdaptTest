@@ -6,12 +6,16 @@ import com.example.demo.google.GoogleBook;
 import com.example.demo.google.GoogleBookService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 @RestController
 public class BookController {
     private final BookRepository bookRepository;
     private final GoogleBookService googleBookService;
+
 
     @Autowired
     public BookController(BookRepository bookRepository, GoogleBookService googleBookService) {
@@ -29,5 +33,17 @@ public class BookController {
                                         @RequestParam(value = "maxResults", required = false) Integer maxResults,
                                         @RequestParam(value = "startIndex", required = false) Integer startIndex) {
         return googleBookService.searchBooks(query, maxResults, startIndex);
+    }
+    
+    @PostMapping("/books/{googleId}")
+    public ResponseEntity<Book> addBookFromGoogle(@PathVariable String googleId) {
+
+        Book book = googleBookService.addBookFromGoogle(googleId);
+
+        if (book == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(book);
     }
 }
